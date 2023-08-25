@@ -45,10 +45,7 @@
 
 #include <stdio.h>
 
-extern "C"
-{
-#include "sdl/SDL.h"
-};
+#include "SDL3/SDL.h"
 
 //set '1' to choose a type of file to play
 #define LOAD_BGRA    1
@@ -97,9 +94,9 @@ void CONVERT_24to32(unsigned char *image_in,unsigned char *image_out,int w,int h
 
 
 //Refresh Event
-#define REFRESH_EVENT  (SDL_USEREVENT + 1)
+#define REFRESH_EVENT  (SDL_EVENT_USER + 1)
 //Break
-#define BREAK_EVENT  (SDL_USEREVENT + 2)
+#define BREAK_EVENT  (SDL_EVENT_USER + 2)
 
 int thread_exit=0;
 
@@ -128,13 +125,13 @@ int main(int argc, char* argv[])
 
 	SDL_Window *screen; 
 	//SDL 2.0 Support for multiple windows
-	screen = SDL_CreateWindow("Simplest Video Play SDL2", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+	screen = SDL_CreateWindow("Simplest Video Play SDL2", 
 		screen_w, screen_h,SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE);
 	if(!screen) {  
 		printf("SDL: could not create window - exiting:%s\n",SDL_GetError());  
 		return -1;
 	}
-	SDL_Renderer* sdlRenderer = SDL_CreateRenderer(screen, -1, 0);  
+	SDL_Renderer* sdlRenderer = SDL_CreateRenderer(screen, 0, 0);
 
 	Uint32 pixformat=0;
 #if LOAD_BGRA
@@ -167,7 +164,7 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	SDL_Rect sdlRect;  
+	SDL_FRect sdlRect;  
 
 	SDL_Thread *refresh_thread = SDL_CreateThread(refresh_video,NULL,NULL);
 	SDL_Event event;
@@ -200,13 +197,13 @@ int main(int argc, char* argv[])
 			sdlRect.h = screen_h;  
 			
 			SDL_RenderClear( sdlRenderer );   
-			SDL_RenderCopy( sdlRenderer, sdlTexture, NULL, &sdlRect);  
+			SDL_RenderTexture( sdlRenderer, sdlTexture, NULL, &sdlRect);  
 			SDL_RenderPresent( sdlRenderer );  
 			
-		}else if(event.type==SDL_WINDOWEVENT){
+		}else if(event.type== SDL_EVENT_WINDOW_RESIZED){
 			//If Resize
 			SDL_GetWindowSize(screen,&screen_w,&screen_h);
-		}else if(event.type==SDL_QUIT){
+		}else if(event.type== SDL_EVENT_QUIT){
 			thread_exit=1;
 		}else if(event.type==BREAK_EVENT){
 			break;
